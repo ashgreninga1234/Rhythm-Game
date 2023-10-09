@@ -1,0 +1,119 @@
+#Advaith Thakur
+#ICS4U1
+
+#Imports pygame and mixer 
+import pygame, sys
+from pygame.locals import QUIT
+from pygame import mixer
+
+#Clock is used to control the speed at which the blocks fall
+clock = pygame.time.Clock()
+#Mixer is initiated to play music
+mixer.init()
+
+#The song is loaded
+mixer.music.load("Set Fire to the Rain.mp3")
+#Screen size is set and displayeed
+screen = pygame.display.set_mode((600, 400))
+#The song is played
+mixer.music.play()
+
+#Prints the keyboard letters that corespond with each creature
+print("Turtle --> a\nFish --> s\nJellyfish -->d\nOctopus -->f")
+
+#These are all of the images added into the game, including the background, and the sea creatures
+background = pygame.image.load('background.jpg')
+background = pygame.transform.scale(background, (600, 400))
+
+Turtle = pygame.image.load("Turtle.png")
+Turtle = pygame.transform.scale(Turtle, (90, 85))
+
+Fish = pygame.image.load("Fish.png")
+Fish = pygame.transform.scale(Fish, (90, 90))
+
+Jellyfish = pygame.image.load("Jellyfish.png")
+Jellyfish = pygame.transform.scale(Jellyfish, (88, 80))
+
+Octopus = pygame.image.load("Octopus.png")
+Octopus = pygame.transform.scale(Octopus, (90, 100))
+
+#Class for the Keys. The keys are the little sea creatures that the falling blocks pass through
+class Key():
+  def __init__(self,x,y,color1,color2,key):
+    self.x = x
+    self.y = y
+    self.color1 = color1
+    self.color2 = color2
+    self.key = key
+    self.rect = pygame.Rect(self.x,self.y,50,20)
+
+#List of Keys and the controls for each creature
+keys = [
+  Key(100,300,(255,0,0),(220,0,0),pygame.K_a),
+  Key(200,300,(0,255,0),(0,220,0),pygame.K_s),
+  Key(300,300,(0,0,255),(0,0,220),pygame.K_d),
+  Key(400,300,(255,255,0),(220,220,0),pygame.K_f),
+]
+
+#map is loaded. 0 has been assigned as a placeholder for the blocks. Therefore in the map file, each 0 corresponds to each block in the gui
+def load(map1):
+  rects = []
+  f = open(map1 + ".txt", 'r')
+  data = f.readlines()
+
+  for y in range(len(data)):
+    for x in range(len(data[y])):
+      if data[y][x] == '0':
+       rects.append(pygame.Rect(keys[x].rect.x,y * -100,50,50))
+  return rects
+
+#Map is loaded
+map_rect = load("Map")
+
+#Score counter starts at 0
+score = 0
+
+
+#Game Running
+while True:  
+#While the game is running, the background is filled in with the underwater image
+    screen.fill((184,249,228))
+    screen.blit(background, (0,0))
+
+  #The blocks are drawn on the screen
+    for rect in map_rect:
+        pygame.draw.rect(screen,(200,0,0),rect)
+        rect.y +=1
+    
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+          
+#When the keys(a,s,d,f) are pressed down, if the falling blocks are touching the animal or a close enough vacinity, a point should be added to the scoreboard.
+        if event.type == pygame.KEYDOWN:
+          
+          if rect.top > 280 or rect.top <300:
+             score = score+1
+            #New Score is printed
+             print('Score: ' + str(score))
+
+  
+    k = pygame.key.get_pressed()
+    for key in keys:
+      if k[key.key]:
+         pygame.draw.rect(screen,key.color1,key.rect)
+      if not k[key.key]:
+         pygame.draw.rect(screen,key.color2,key.rect)
+    
+    #The sea creatures are shown on screen in these coordinates provided.
+    screen.blit(Turtle, (81,270))
+    screen.blit(Fish, (190,270))
+    screen.blit(Jellyfish, (280,280))
+    screen.blit(Octopus, (382,275))
+
+
+  #Game is displayed
+    pygame.display.update()
+  #The block falls at the speed provided.
+    clock.tick(60)
